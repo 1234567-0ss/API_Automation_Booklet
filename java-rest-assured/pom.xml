@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================
+  pom.xml — Project Object Model (Maven Build Configuration)
+  ============================================================
+  Maven is a BUILD TOOL for Java projects. It does three things:
+    1. DOWNLOADS libraries (dependencies) your project needs from the internet
+    2. COMPILES your Java source files into bytecode (.class files) the JVM can run
+    3. RUNS your tests when you type: mvn test
+
+  Think of pom.xml like:
+    - package.json  in Node.js / JavaScript
+    - requirements.txt in Python
+  ...but with more power (it handles building AND running, not just dependencies).
+
+  HOW TO RUN TESTS:
+    Open a terminal in this folder (where pom.xml lives) and run:
+      mvn test
+    Maven will download missing libraries, compile everything, and execute all tests.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+      modelVersion: always "4.0.0"
+      This is the version of the POM XML FORMAT itself — not your project version.
+      It has been 4.0.0 for many years and rarely changes.
+    -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+      ── PROJECT COORDINATES ──────────────────────────────────────────────────
+      These three values together uniquely identify your project in the
+      global Maven ecosystem (Maven Central repository).
+
+      groupId   : Your organisation or top-level package namespace.
+                  Reverse-domain style: com.yourcompany.yourteam
+      artifactId: The name of THIS specific project or module.
+                  Used as the filename of the generated JAR: artifactId-version.jar
+      version   : The current version of this project.
+                  1.0.0 = first stable release
+                  1.0.0-SNAPSHOT = work in progress (not yet released)
+    -->
+    <groupId>com.simplebooksapi</groupId>
+    <artifactId>simple-books-api-java-tests</artifactId>
+    <version>1.0.0</version>
+
+    <!--
+      ── PROPERTIES ───────────────────────────────────────────────────────────
+      Reusable constants used in this file (and inherited by child modules).
+      Reference a property value anywhere with: ${propertyName}
+      Example: ${maven.compiler.source} resolves to "11" below.
+    -->
+    <properties>
+        <!--
+          maven.compiler.source: which Java LANGUAGE VERSION to accept when compiling.
+          "11" means you can use Java 11 syntax features (var, text blocks base, etc.)
+          but NOT newer features like records (Java 16+) or sealed classes (Java 17+).
+        -->
+        <maven.compiler.source>11</maven.compiler.source>
+
+        <!--
+          maven.compiler.target: which Java RUNTIME VERSION to target.
+          The bytecode produced will run on Java 11 JVMs and above.
+          Setting source and target to the same version is the safe default.
+        -->
+        <maven.compiler.target>11</maven.compiler.target>
+
+        <!--
+          project.build.sourceEncoding: the character encoding used to READ your .java files.
+          UTF-8 handles all international characters (accents, symbols, etc.) correctly.
+          Without this Maven shows a warning: "file encoding has not been set".
+        -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!--
+      ── DEPENDENCIES ─────────────────────────────────────────────────────────
+      Libraries your code needs that are NOT part of standard Java.
+      Maven downloads each one from Maven Central (https://mvnrepository.com)
+      and stores a local copy in ~/.m2/repository so future builds are faster.
+
+      Each dependency block needs:
+        groupId    : who published the library
+        artifactId : which library
+        version    : which version to use (always pin a specific version in test projects)
+        scope      : when this library is needed (see explanation below each one)
+    -->
+    <dependencies>
+
+        <!--
+          ── DEPENDENCY 1: REST ASSURED ────────────────────────────────────────
+          The main HTTP testing library — the heart of this project.
+
+          WHAT IT DOES:
+            Provides a readable, fluent "Given / When / Then" API to:
+              - Build and send HTTP requests (GET, POST, PATCH, DELETE)
+              - Validate the responses (status code, headers, JSON body)
+
+          EXAMPLE (from BooksTest.java):
+            RestAssured.given()
+                .spec(requestSpec)           ← reuse shared config
+                .queryParam("type","fiction") ← add ?type=fiction to URL
+            .when()
+                .get("/books")               ← send GET /books?type=fiction
+            .then()
+                .statusCode(200)             ← assert HTTP 200
+                .body("type", everyItem(equalTo("fiction"))); ← assert all results are fiction
+
+          Think of it as: Postman, but written in code so it can run automatically.
+
+          scope="test": this library is ONLY on the classpath during compilation
+          and test execution. It is NOT included in any production JAR/WAR.
+          This keeps your production bundle lean.
+        -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>5.4.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--
+          ── DEPENDENCY 2: TESTNG ──────────────────────────────────────────────
+          The test runner framework — organises and executes your @Test methods.
+
+          WHAT IT DOES:
+            - Discovers methods annotated with @Test and runs them
+            - Tracks pass/fail/skip and generates XML + HTML reports
+            - Provides lifecycle annotations:
+                @BeforeSuite   → runs once before the whole suite
+                @BeforeClass   → runs once before each test class
+                @BeforeMethod  → runs before each individual @Test method
+                (and After equivalents for teardown)
+            - Supports parallel execution and test ordering/dependencies
+
+          ALTERNATIVE: JUnit is another popular test runner.
+          TestNG was chosen here for its richer dependency (dependsOnMethods)
+          and parallel execution features, both used in OrdersTest.java.
+
+          scope="test": same reason as REST Assured above.
+        -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.9.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--
+          ── DEPENDENCY 3: JACKSON DATABIND ───────────────────────────────────
+          Converts between Java objects and JSON strings automatically.
+
+          WHAT IT DOES:
+            Serialisation   (Java → JSON): When you do .body(someMap), Jackson
+                            turns the Java Map into a JSON string before sending.
+            Deserialisation (JSON → Java): When you call .extract().as(MyClass.class),
+                            Jackson parses the JSON response into a Java object.
+
+          WHY NO scope="test"?
+            Jackson needs to be on the classpath at COMPILE TIME (not just test time)
+            because REST Assured's source code references Jackson classes directly.
+            Omitting scope means the default "compile" scope is used.
+
+          NOTE: You generally do not call Jackson directly in your test code.
+          REST Assured detects it on the classpath and uses it automatically whenever
+          you call .body(map) or extract JSON values.
+        -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.16.1</version>
+        </dependency>
+
+    </dependencies>
+
+    <!--
+      ── BUILD CONFIGURATION ───────────────────────────────────────────────────
+      Plugins extend Maven's default build lifecycle.
+      The lifecycle has phases: validate → compile → test → package → install → deploy
+      Plugins hook into these phases to add behaviour.
+    -->
+    <build>
+        <plugins>
+
+            <!--
+              ── PLUGIN: MAVEN SUREFIRE PLUGIN ──────────────────────────────────
+              Bridges Maven and your test framework (TestNG or JUnit).
+
+              WHY we need this explicitly:
+                Maven has a default version of Surefire built-in, but it may not
+                know how to use testng.xml. By declaring it here we:
+                  1. Pin a specific version (3.2.5) so behaviour is predictable
+                  2. Configure it to use OUR testng.xml as the test suite definition
+
+              WHAT IT DOES:
+                When you run 'mvn test', Maven calls the Surefire plugin which:
+                  1. Reads testng.xml to know which classes to run and how
+                  2. Launches TestNG with that configuration
+                  3. Collects results into target/surefire-reports/
+
+              Reports are saved to: target/surefire-reports/
+                - testng-results.xml (machine readable)
+                - index.html         (human readable, open in browser)
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <!--
+                      suiteXmlFiles: tells Surefire to hand control to TestNG
+                      and use this XML file as the suite configuration.
+
+                      Without this tag, Surefire would scan for test classes
+                      itself using naming conventions (Test*.java / *Test.java)
+                      and you'd lose the parallel/ordering config in testng.xml.
+                    -->
+                    <suiteXmlFiles>
+                        <!--
+                          Path is relative to the project root (same folder as pom.xml).
+                          testng.xml defines which test classes to run and in what order.
+                        -->
+                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

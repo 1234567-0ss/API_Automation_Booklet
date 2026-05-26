@@ -1,0 +1,109 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!--
+  ==============================================================
+  testng.xml — TestNG Suite Configuration
+  ==============================================================
+  This file controls HOW TestNG runs the tests.
+
+  Without testng.xml, TestNG would find every @Test method and run
+  them in an unpredictable order with no parallel control.
+  This file gives us:
+    1. Named groups so reports are readable
+    2. Parallel execution (faster test runs)
+    3. A clear list of exactly which classes belong to the suite
+
+  This file is referenced in pom.xml inside the Surefire plugin config,
+  so 'mvn test' automatically uses it.
+
+  VOCABULARY:
+    Suite  → the whole test run (everything in this file)
+    Test   → a named group of test classes (just a label, not one @Test method)
+    Class  → a Java test class (e.g. BooksTest)
+    Method → an individual @Test annotated method inside a class
+-->
+
+<!--
+  <suite> ATTRIBUTES:
+
+  name="Simple Books API Test Suite"
+    A human-readable label that appears in the HTML report title.
+    Can be anything you want — it's purely for readability.
+
+  parallel="classes"
+    Controls the unit of parallelism. Options:
+      "none"    → run everything one after another (sequential)
+      "methods" → each individual @Test method can run simultaneously
+      "classes" → each test CLASS runs in its own thread
+      "tests"   → each <test> block below runs in its own thread
+    We use "classes" so StatusTest, BooksTest, and OrdersTest all
+    run at the same time, reducing total test duration.
+
+  thread-count="3"
+    Maximum number of threads (parallel workers) to use.
+    Set to 3 because we have 3 test classes — one thread per class.
+    If you had 10 classes but thread-count="3", only 3 would run at once.
+
+  verbose="2"
+    How much detail TestNG prints to the console while running.
+    0 = silent, 1 = minimal, 2 = normal, 10 = very detailed (for debugging).
+-->
+<suite name="Simple Books API Test Suite" parallel="classes" thread-count="3" verbose="2">
+
+    <!--
+      ── TEST BLOCK 1: Status Tests ──────────────────────────────────────────
+      A <test> block is just a named container for one or more classes.
+      It is NOT the same as a single @Test method — it's a logical grouping.
+
+      All classes inside one <test> block are considered a group.
+      Results in the HTML report are organised by these test block names.
+    -->
+    <test name="Status Tests">
+        <classes>
+            <!--
+              <class name="..."> specifies a Java class to include.
+
+              The name must be the FULLY QUALIFIED class name:
+                package + "." + ClassName
+                "com.simplebooksapi.tests" + "." + "StatusTest"
+
+              TestNG uses Java reflection to find and call @Test methods inside.
+              Maven compiles your .java files to .class files in target/test-classes/,
+              and TestNG loads them from there.
+            -->
+            <class name="com.simplebooksapi.tests.StatusTest"/>
+        </classes>
+    </test>
+
+    <!--
+      ── TEST BLOCK 2: Books Tests ────────────────────────────────────────────
+      Tests for the /books endpoints.
+      No auth required — all tests are independent of each other.
+      Runs in parallel with the other two test blocks.
+    -->
+    <test name="Books Tests">
+        <classes>
+            <class name="com.simplebooksapi.tests.BooksTest"/>
+        </classes>
+    </test>
+
+    <!--
+      ── TEST BLOCK 3: Orders Tests ───────────────────────────────────────────
+      Full CRUD lifecycle for /orders. Auth is required.
+
+      IMPORTANT: Inside OrdersTest.java the test methods use dependsOnMethods
+      to enforce ordering (Create → Read → Update → Delete).
+      TestNG respects that ordering even though this block runs in parallel
+      with the other two blocks above.
+
+      In other words:
+        - StatusTest, BooksTest, OrdersTest all START at the same time (parallel)
+        - But WITHIN OrdersTest, the individual test methods run sequentially
+          in the correct dependency chain
+    -->
+    <test name="Orders Tests">
+        <classes>
+            <class name="com.simplebooksapi.tests.OrdersTest"/>
+        </classes>
+    </test>
+
+</suite>

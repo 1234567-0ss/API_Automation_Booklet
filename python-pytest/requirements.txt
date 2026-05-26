@@ -1,0 +1,89 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# requirements.txt — Python Project Dependencies
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# This file lists every external library (package) that this project needs.
+# Python's package manager (pip) reads this file to install everything at once.
+#
+# HOW TO INSTALL ALL DEPENDENCIES:
+#   Open a terminal in this folder and run:
+#     pip install -r requirements.txt
+#
+#   pip will download and install each package from PyPI (https://pypi.org)
+#   into your active Python environment.
+#
+# WHY PIN EXACT VERSIONS (==)?
+#   Using == means "install EXACTLY this version, nothing newer or older."
+#   This guarantees every developer (and CI server) uses the same code,
+#   preventing "it works on my machine" bugs caused by version differences.
+#   Alternative: requests>=2.31.0 means "any version at or above 2.31.0"
+#   but then a future breaking version could silently break your tests.
+#
+# HOW TO UPDATE A DEPENDENCY:
+#   Change the version number, then re-run: pip install -r requirements.txt
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── PACKAGE 1: requests ───────────────────────────────────────────────────────
+# The HTTP client library — sends real HTTP requests from Python code.
+#
+# WHAT IT DOES:
+#   Provides simple functions to make any HTTP call:
+#     requests.get(url)                       ← GET request
+#     requests.post(url, json=payload)        ← POST with JSON body
+#     requests.patch(url, json=payload)       ← PATCH request
+#     requests.delete(url)                    ← DELETE request
+#     requests.get(url, params={"key":"val"}) ← adds ?key=val to URL
+#     requests.get(url, headers={"Authorization": "Bearer ..."}) ← custom headers
+#
+# WHAT IT RETURNS:
+#   A Response object with:
+#     response.status_code   → the HTTP status code (200, 404, etc.)
+#     response.json()        → parses the body as JSON, returns a Python dict/list
+#     response.text          → the raw response body as a string
+#     response.headers       → response headers as a dict-like object
+#
+# ANALOGY: It's like Postman, but in Python code so it can run automatically.
+requests==2.31.0
+
+# ── PACKAGE 2: pytest ─────────────────────────────────────────────────────────
+# The test framework — discovers, runs, and reports test results.
+#
+# WHAT IT DOES:
+#   - Discovers test files named test_*.py or *_test.py
+#   - Discovers test functions/methods starting with test_
+#   - Runs each test and tracks PASS / FAIL / ERROR / SKIP
+#   - Generates a test report in the terminal
+#   - Provides the assert statement enhancement (shows you WHAT failed, not just THAT it failed)
+#
+# HOW TO RUN TESTS:
+#   pytest                        ← run all tests
+#   pytest tests/test_books.py    ← run a specific file
+#   pytest -k "fiction"           ← run tests whose name contains "fiction"
+#   pytest -v                     ← verbose output (shows each test name)
+#
+# KEY CONCEPT — Fixtures:
+#   pytest fixtures are reusable setup functions (defined in conftest.py).
+#   A test asks for a fixture by adding it as a parameter:
+#     def test_something(base_url):   ← pytest auto-provides base_url
+#   This avoids repeating setup code in every test.
+pytest==8.1.1
+
+# ── PACKAGE 3: pytest-html ────────────────────────────────────────────────────
+# A pytest plugin that generates a visual HTML test report.
+#
+# WHAT IT DOES:
+#   Produces an HTML file with:
+#     - Summary (total pass/fail/skip counts)
+#     - Duration of each test
+#     - Links to failed test details and error tracebacks
+#     - Filterable table of all test results
+#
+# HOW TO USE:
+#   pytest --html=report.html          ← generates report.html
+#   pytest --html=report.html --self-contained-html  ← single file (no external CSS)
+#   Then open report.html in any web browser to review results.
+#
+# WHY IS THIS USEFUL?
+#   The terminal output disappears when you close the window.
+#   An HTML report is a persistent, shareable artifact you can send to your team.
+pytest-html==4.1.1

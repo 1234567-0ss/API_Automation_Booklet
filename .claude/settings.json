@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"d:\\\\Downloads\\\\simple-books-api-tests\" -Recurse -Force)",
+      "Bash(Sort-Object)"
+    ]
+  }
+}

@@ -1,0 +1,82 @@
+{
+  // ════════════════════════════════════════════════════════════════════════════
+  // tsconfig.json — TypeScript Compiler Configuration
+  // ════════════════════════════════════════════════════════════════════════════
+  //
+  // This file tells the TypeScript compiler (tsc) HOW to compile .ts files.
+  //
+  // WHAT IS TYPESCRIPT?
+  //   TypeScript is JavaScript with TYPE ANNOTATIONS.
+  //   You write .ts files, the compiler checks for type errors, then
+  //   converts them to plain .js files that Node.js can run.
+  //
+  //   Example TypeScript:
+  //     let name: string = "John";   // ← : string is the type annotation
+  //     name = 42;                   // ← ERROR: number is not assignable to string
+  //
+  //   TypeScript catches these mistakes at COMPILE TIME (before running),
+  //   not at RUNTIME (when it's already too late and your tests are failing).
+  //
+  // WHY DOES THIS FILE SUPPORT COMMENTS (// style)?
+  //   Regular JSON does NOT allow comments. But TypeScript uses a superset
+  //   called JSONC (JSON with Comments), so tsconfig.json is the one JSON file
+  //   where you CAN write // and /* */ comments.
+  // ════════════════════════════════════════════════════════════════════════════
+
+  "compilerOptions": {
+    // compilerOptions: settings that control how TypeScript compiles your code.
+
+    // ── target ────────────────────────────────────────────────────────────────
+    // Which version of JavaScript to PRODUCE after compilation.
+    // "ES2020" means the output .js files use ECMAScript 2020 features.
+    // Node.js (which runs the tests) fully supports ES2020, so this is safe.
+    // If you needed to support very old environments, you'd lower this (e.g. "ES5").
+    "target": "ES2020",
+
+    // ── module ────────────────────────────────────────────────────────────────
+    // Which JavaScript MODULE SYSTEM to use in the compiled output.
+    // "commonjs" = Node.js's module system: require() / module.exports
+    // This is correct for Node.js test runners like Playwright.
+    // Alternative: "ESNext" uses ES modules (import/export) — different syntax.
+    "module": "commonjs",
+
+    // ── strict ────────────────────────────────────────────────────────────────
+    // true → enable ALL strict type-checking rules at once.
+    // This is recommended for new projects. It enables rules like:
+    //   - noImplicitAny: variables must have explicit types, not inferred 'any'
+    //   - strictNullChecks: you must handle null/undefined explicitly
+    //   - strictFunctionTypes: functions must match parameter/return types precisely
+    // Strict mode catches more bugs at compile time.
+    "strict": true,
+
+    // ── esModuleInterop ───────────────────────────────────────────────────────
+    // true → allows you to import CommonJS modules (require-style) using ES import syntax.
+    // Example: import requests from 'axios' (instead of const axios = require('axios'))
+    // Without this, importing some npm packages in TypeScript can cause errors
+    // about "has no default export".
+    // Nearly all modern TypeScript projects set this to true.
+    "esModuleInterop": true,
+
+    // ── lib ───────────────────────────────────────────────────────────────────
+    // Which BUILT-IN TypeScript type definitions to include.
+    // Type definitions tell TypeScript about built-in JavaScript/browser/Node APIs.
+    // ["ES2020"] includes types for all JavaScript standard library features
+    // available in ES2020 (Promise, Map, Set, Array methods, etc.).
+    // Without this, TypeScript would not know about standard APIs and flag them as errors.
+    "lib": ["ES2020"]
+  },
+
+  // ── include ────────────────────────────────────────────────────────────────
+  // Which FILE PATTERNS to include in the compilation.
+  // Only these files are type-checked and compiled.
+  "include": [
+    // tests/**/*.ts → any .ts file inside tests/ at any depth
+    // This picks up: tests/api/status.spec.ts, tests/api/books.spec.ts, etc.
+    "tests/**/*.ts",
+
+    // utils/**/*.ts → any .ts file inside utils/ at any depth
+    // This picks up: utils/auth.ts
+    "utils/**/*.ts"
+  ]
+  // Everything NOT matched here (e.g. node_modules) is ignored.
+}

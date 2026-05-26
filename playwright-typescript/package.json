@@ -1,0 +1,17 @@
+{
+  "name": "simple-books-api-playwright-tests",
+  "version": "1.0.0",
+  "description": "API tests for Simple Books API using Playwright",
+
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "playwright test tests/api",
+    "test:report": "playwright test --reporter=html",
+    "report": "playwright show-report"
+  },
+
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "typescript": "^5.4.5"
+  }
+}
