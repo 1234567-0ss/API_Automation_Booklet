@@ -1,0 +1,26 @@
+# Java compiled output
+target
+.class
+
+# Python cache
+__pycache__
+.pyc
+.pytest_cache
+.egg-info
+
+# Node.js
+node_modules
+playwright-report
+test-results
+
+# IDE files
+.idea
+.vscode
+.iml
+
+# Word doc (large binary, optional to exclude)
+.docx
+
+# OS files
+.DS_Store
+Thumbs.db
